@@ -12,7 +12,7 @@ _The plugin for Wordpress 5.8 and earlier will not be actively maintained or dev
 
 2. WordPress-5.8-legacy (Requires WordPress 5.0 to 5.8)
 
-# How Does it Work
+## How to Run the Source Code
 
 This project was bootstrapped with [Wordpress Create Block](https://github.com/WordPress/gutenberg/blob/1f92999896beb98a572f46722e35b31b1de8d547/packages/create-block/README.md).
 
