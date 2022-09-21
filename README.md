@@ -2,6 +2,10 @@
 
 Official distribution channel for the Bynder WordPress Connector
 
+## Breaking Changes
+
+* **v5.2.0:** Replaced permanent token setting with OAuth 2.0 client credentials (for Bynder portals only). You can find more information on OAuth 2.0 client credentials for Bynder [here](https://support.bynder.com/hc/en-us/articles/360013875180-Create-your-OAuth-Apps).
+
 ## WordPress Requirements
 
 There are currently two versions of the plugin in order to support WordPress 5.8 and earlier. The plugin files can be found in the folders named with the WordPress versions they currently support. In each folder, you will find a ZIP for the plugin and a ZIP that contains the source code if you want to make further customizations to the plugin.  
