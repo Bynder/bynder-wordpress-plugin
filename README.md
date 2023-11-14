@@ -12,7 +12,7 @@ There are currently two versions of the plugin in order to support WordPress 5.8
 
 _The plugin for Wordpress 5.8 and earlier will not be actively maintained or developed on._ 
 
-1. WordPress (Requires at least WordPress 5.9, tested up to 6.0.2)
+1. WordPress (Requires at least WordPress 5.9, tested up to 6.3.1)
 
 2. WordPress-5.8-legacy (Requires WordPress 5.0 to 5.8)
 
