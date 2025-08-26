@@ -1,0 +1,30 @@
+/**
+ * The following styles get applied inside the editor only.
+ *
+ * Replace them with your own styles or remove the file completely.
+ */
+@import "common";
+.wp-block-create-block-bynder-wordpress {
+	background: $green;
+	border: 0.2rem solid $black;
+	color: $black;
+	margin: 0 auto;
+	max-width: 740px;
+	padding: 2rem;
+}
+
+.ucv-media-frame {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	height: 100%;
+	flex-direction: column;
+}
+
+.ucv-media-frame img {
+	padding: 24px;
+}
+
+.ucv-media-frame-message {
+	margin: 10px;
+}

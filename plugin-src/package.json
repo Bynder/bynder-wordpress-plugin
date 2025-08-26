@@ -1,0 +1,26 @@
+{
+	"name": "bynder-wordpress",
+	"version": "4.1.3",
+	"private": true,
+	"scripts": {
+		"build": "wp-scripts build",
+		"format": "wp-scripts format",
+		"lint:css": "wp-scripts lint-style",
+		"lint:js": "wp-scripts lint-js",
+		"start": "wp-scripts start",
+		"packages-update": "wp-scripts packages-update"
+	},
+	"dependencies": {
+		"@bynder/compact-view": "^4.2.3",
+		"@wordpress/block-editor": "^8.0.13",
+		"@wordpress/blocks": "^11.1.5",
+		"@wordpress/compose": "^5.0.7",
+		"@wordpress/data": "^6.1.5",
+		"@wordpress/element": "^4.0.4",
+		"@wordpress/hooks": "^3.2.2",
+		"@wordpress/i18n": "^4.2.4"
+	},
+	"devDependencies": {
+		"@wordpress/scripts": "^19.2.3"
+	}
+}

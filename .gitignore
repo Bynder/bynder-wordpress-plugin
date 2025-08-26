@@ -1,1 +1,6 @@
 .idea/
+*DS_Store*
+._*
+plugin-src/src/dist
+plugin-src/build
+plugin-src/node_modules
