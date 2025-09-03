@@ -1,0 +1,3 @@
+Bynder WordPress 5 plugin
+
+For more information please visit https://support.bynder.com/hc/en-us/articles/360013872400-Integrate-Bynder-with-Wordpress-5

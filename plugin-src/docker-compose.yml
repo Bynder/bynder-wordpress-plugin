@@ -1,0 +1,51 @@
+---
+version: '3.7'
+
+services:
+    mysql:
+        image: mysql
+        command: ["mysqld", "--mysql-native-password=ON"]
+        restart: always
+        ports:
+            - 3306:3306
+        environment:
+            MYSQL_ROOT_PASSWORD: wordpress123
+            MYSQL_DATABASE: wordpress
+            MYSQL_USER: wordpress
+            MYSQL_PASSWORD: wordpress123
+        networks:
+            - wordpress-net
+
+    adminer:
+        image: adminer
+        restart: always
+        ports:
+            - 7776:8080
+        networks:
+            - wordpress-net
+
+    wordpress:
+        depends_on:
+            - mysql
+        image: wordpress:6.6.2
+        platform: linux/arm64
+        restart: always
+        volumes:
+            - .:/var/www/html/wp-content/plugins/bynder-wordpress
+        ports:
+            - 7777:80
+        environment:
+            WORDPRESS_DB_HOST: mysql
+            WORDPRESS_DB_USER: wordpress
+            WORDPRESS_DB_PASSWORD: wordpress123
+            WORDPRESS_DB_NAME: wordpress
+            WORDPRESS_DEBUG: 1
+        networks:
+            - wordpress-net
+
+networks:
+    wordpress-net:
+
+volumes:
+    data:
+        driver: local

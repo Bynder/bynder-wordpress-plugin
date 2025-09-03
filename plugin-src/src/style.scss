@@ -1,0 +1,21 @@
+/**
+ * The following styles get applied both on the front of your site
+ * and in the editor.
+ *
+ * Replace them with your own styles or remove the file completely.
+ */
+ @import "common";
+.wp-block-create-block-bynder-wordpress {
+	background: $red;
+	border: 0.2rem solid $black;
+	color: $black;
+	margin: 0 auto;
+	max-width: 740px;
+	padding: 2rem;
+}
+.bynder-gallery {
+	.components-form-file-upload {
+		display: none;
+	}
+}
+
