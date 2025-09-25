@@ -155,13 +155,13 @@ addFilter(
 
 			return (
 				<Fragment>
-					<div class="bynder-gallery">
+					<div className="bynder-gallery">
 						<BlockEdit {...props} />
-						<div class="compact-view-button">
+						<div className="compact-view-button">
 							<React.Fragment>
 								<button
 									onClick={openModal}
-									class="components-button button button-large"
+									className="components-button button button-large"
 								>
 									Open Compact View
 								</button>
@@ -314,7 +314,7 @@ registerBlockType('bynder/bynder-asset-block', {
 			<React.Fragment>
 				<button
 					onClick={openModal}
-					class="components-button button button-large"
+					className="components-button button button-large"
 				>
 					Open Compact View
 				</button>
@@ -429,7 +429,7 @@ registerBlockType('bynder/bynder-gallery-block', {
 			<React.Fragment>
 				<button
 					onClick={openModal}
-					class="components-button button button-large"
+					className="components-button button button-large"
 				>
 					Open Compact View
 				</button>
@@ -574,7 +574,7 @@ class UCVSingleSelect extends React.Component {
 			<React.Fragment>
 				<div id="bynder-featured-image-preview">
 					{(this.state.importState === "loading" || this.state.importState === "error") && (
-						<div class="ucv-media-frame-message">{this.state.msgContent}</div>
+						<div className="ucv-media-frame-message">{this.state.msgContent}</div>
 					)}
 					{this.state.importState === "success" && (
 						<img src={this.state.featuredImageUrl} height="250"/>
@@ -583,7 +583,7 @@ class UCVSingleSelect extends React.Component {
 				<div>
 					<button
 						onClick={openModal}
-						class="components-button button button-large"
+						className="components-button button button-large"
 					>
 						Open Compact View
 					</button>
