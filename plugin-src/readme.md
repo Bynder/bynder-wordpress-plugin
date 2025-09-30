@@ -4,7 +4,7 @@ The Bynder WordPress plugin was built as a Gutenberg Block, that allows to add a
 
 # Current status
 
-The latest version of this plugin is **5.5.4** and requires at least **WordPress 5.9** and it was tested up to **WordPress 6.6.1**.
+The latest version of this plugin is **5.5.6** and requires at least **WordPress 5.9** and it was tested up to **WordPress 6.6.1**.
 
 ## Implemented features
 
@@ -43,16 +43,16 @@ Instructions based off of https://bynder.atlassian.net/wiki/spaces/BE/pages/3890
 3. On the left navigate to `Plugins` and then to `Installed Plugins`. Activate the `Bynder` plugin.
 4. On the left navigate to `Settings` and then to `Bynder` and configure plugin.
 5. From the root directory run the following commands:
-   
-	`npm install`
-   	`npm run start`
-6. Navigate back to WordPress running locally and to `Posts`. Edit or create a new post. Click the `+` button and 
+
+   `npm install`
+   `npm run start`
+
+6. Navigate back to WordPress running locally and to `Posts`. Edit or create a new post. Click the `+` button and
    then `Bynder Asset`. This will display the option to click `Open Compact View`.
 7. Follow flow for UCV (Bynder or Webdam portal). Select assets to use within WordPress block.
-   
+
 ## Plugin Structure
 
 Reference: https://bynder.atlassian.net/wiki/spaces/BE/pages/3891036299/Overview+of+the+Plugin+Structure
-
 
 ---
