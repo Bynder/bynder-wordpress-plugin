@@ -4,7 +4,7 @@ The Bynder WordPress plugin was built as a Gutenberg Block, that allows to add a
 
 # Current status
 
-The latest version of this plugin is **5.5.6** and requires at least **WordPress 5.9** and it was tested up to **WordPress 6.6.1**.
+The latest version of this plugin is **5.5.7** and requires at least **WordPress 5.9** and it was tested up to **WordPress 6.6.1**.
 
 ## Implemented features
 
