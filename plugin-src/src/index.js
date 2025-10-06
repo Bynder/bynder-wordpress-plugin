@@ -253,6 +253,16 @@ registerBlockType('bynder/bynder-asset-block', {
 			var block;
 			switch (asset.type) {
 				case 'IMAGE':
+					// show alert if asset not public
+					if (
+						asset.files != null &&
+						asset.files.original === undefined
+					) {
+						alert(
+							asset.name +
+							' is not marked as public and the original cannot be selected.'
+						);
+					}
 					var file =
 						asset.files[cgbGlobal.bynderImageDerivative] ||
 						asset.files.webImage;
@@ -268,11 +278,31 @@ registerBlockType('bynder/bynder-asset-block', {
 					});
 					break;
 				case 'VIDEO':
+					// check selection mode and default derivative
+					// show alert if original is selected but not public
+					if (
+						asset.files != null &&
+						asset.files.original === undefined
+					) {
+						alert(
+							asset.name +
+							' is not marked as public and the original cannot be selected.'
+						);
+					}
 					// Fetching the mp4 video preview url by default, fallback to original if mp4 isn't found
 					var url = asset.previewUrls.find((previewUrl) => {
 						var extension = previewUrl.split('.').pop();
 						return extension === 'mp4';
 					});
+
+					// break if preview url not found and original is also undefined
+					// video url below uses previewUrl if found, otherwise original url
+					// break if original url not found
+					if (!url && asset.files != null && asset.files.original === undefined) {
+						break;
+					}
+
+
 					var videoUrl = url ? url : asset.files.original.url;
 					block = createBlock('core/video', {
 						src: videoUrl,
@@ -280,6 +310,15 @@ registerBlockType('bynder/bynder-asset-block', {
 					});
 					break;
 				case 'AUDIO':
+					if (asset.files != null && asset.files.original === undefined) {
+						alert(
+							asset.name +
+							' is not marked as public and the original cannot be selected.'
+						);
+						// break because audioUrl uses original url
+						break;
+					}
+
 					var audioUrl = asset.files.original.url;
 					block = createBlock('core/audio', {
 						src: audioUrl,
@@ -287,11 +326,12 @@ registerBlockType('bynder/bynder-asset-block', {
 					});
 					break;
 				case 'DOCUMENT':
-					if (asset.files.original === undefined) {
+					if (asset.files != null && asset.files.original === undefined) {
 						alert(
 							asset.name +
-								' is not marked as public and cannot be selected.'
+							' is not marked as public and the original cannot be selected.'
 						);
+						// break to prevent creating a file block without a valid url
 						break;
 					}
 					block = createBlock('core/file', {
