@@ -236,8 +236,6 @@ registerBlockType('bynder/bynder-asset-block', {
 	edit: (props) => {
 		var attributes = props.attributes;
 
-		console.log('Hihihihih')
-
 		var openModal = () => {
 			props.setAttributes({
 				isOpen: true,
