@@ -12,7 +12,7 @@
 	},
 	"dependencies": {
 		"@bynder/compact-view": "^5.2.4",
-		"@wordpress/block-editor": "^8.0.13",
+		"@wordpress/block-editor": "10.0.0",
 		"@wordpress/blocks": "^11.1.5",
 		"@wordpress/compose": "^5.0.7",
 		"@wordpress/data": "^6.1.5",
