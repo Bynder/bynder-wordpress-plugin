@@ -34,6 +34,11 @@ const assetFieldSelection = `
   files
   ... on Video {
     previewUrls
+    streamingLinks {
+      dash
+      hls
+      embedCode
+    }
   }
 `;
 
