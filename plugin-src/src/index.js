@@ -34,11 +34,6 @@ const assetFieldSelection = `
   files
   ... on Video {
     previewUrls
-    streamingLinks {
-      dash
-      hls
-      embedCode
-    }
   }
 `;
 
@@ -303,54 +298,24 @@ registerBlockType('bynder/bynder-asset-block', {
 								' is not marked as public and the original cannot be selected.'
 						);
 					}
+					// Fetching the mp4 video preview url by default, fallback to original if mp4 isn't found
+					var url = asset.previewUrls.find((previewUrl) => {
+						var extension = previewUrl.split('.').pop();
+						return extension === 'mp4';
+					});
 
-					let videoUrl;
-
+					// break if preview url not found and original is also undefined
+					// video url below uses previewUrl if found, otherwise original url
+					// break if original url not found
 					if (
-						cgbGlobal.bynderSelectionMode === 'SingleSelectFile' &&
-						additionalInfo.selectedFile
+						!url &&
+						asset.files != null &&
+						asset.files.original === undefined
 					) {
-						const selectedUrl = additionalInfo.selectedFile.url;
-						const isUrl = (str) => {
-							try {
-								new URL(str);
-								return true;
-							} catch {
-								return false;
-							}
-						};
-
-						// embedCode is raw HTML, not a URL — insert as a Custom HTML block
-						if (!isUrl(selectedUrl)) {
-							block = createBlock('core/html', {
-								content: selectedUrl,
-							});
-
-							break;
-						}
-
-						videoUrl = selectedUrl;
-					} else {
-						// Fetching the mp4 video preview url by default, fallback to original if mp4 isn't found
-						const previewUrl = asset.previewUrls.find((url) => {
-							const extension = url.split('.').pop();
-							return extension === 'mp4';
-						});
-
-						// break if preview url not found and original is also undefined
-						if (
-							!previewUrl &&
-							asset.files != null &&
-							asset.files.original === undefined
-						) {
-							break;
-						}
-
-						videoUrl = previewUrl
-							? previewUrl
-							: asset.files.original.url;
+						break;
 					}
 
+					var videoUrl = url ? url : asset.files.original.url;
 					block = createBlock('core/video', {
 						src: videoUrl,
 						bynder: asset.databaseId,
