@@ -4,7 +4,7 @@
  * Description: Allows users to easily import and use their Bynder images and videos directly in WordPress, helping brands save time and maintain consistency. Requires at least WordPress 5.9, tested up to 6.9.4.
  * Author: Bynder BV
  * Author URI: https://www.bynder.com/
- * Version: 5.5.8
+ * Version: 5.5.9
  *
  * @package bynder-wordpress
  * @author Bynder
@@ -206,8 +206,8 @@ function bynder_client_secret_field_render() {
 	if(!empty($settings['client_secret'])) {
 		echo '<div id="client-secret-container"></div>';
 		echo '<p class="description">';
-		echo '<button class="button button-secondary" id="edit-client-secret">Replace Client Secret</button>';
-		echo '<button class="button button-secondary" id="cancel-client-secret" style="display:none">Cancel</button>';
+		echo '<button type="button" class="button button-secondary" id="edit-client-secret">Replace Client Secret</button>';
+		echo '<button type="button" class="button button-secondary" id="cancel-client-secret" style="display:none">Cancel</button>';
 		echo '</p>';
 		return;
 	}
