@@ -4,7 +4,7 @@ The Bynder WordPress plugin was built as a Gutenberg Block, that allows to add a
 
 # Current status
 
-The latest version of this plugin is **5.5.9** and requires at least **WordPress 5.9** and it was tested up to **WordPress 6.9.4**.
+The latest version of this plugin is **5.6.0** and requires at least **WordPress 5.9** and it was tested up to **WordPress 6.9.4**.
 
 ## Implemented features
 
@@ -32,6 +32,13 @@ Below you will find some information on how to run scripts.
 
 - Use to build production code for your block inside `build` folder.
 - Runs once and reports back the gzip file sizes of the produced code.
+
+## 👉 `make release`
+
+- Use to package the plugin into a distributable zip file.
+- Output is written to `../Wordpress/Bynder-Wordpress-Plugin.zip`.
+- Runs `npm run build` automatically if the `build` folder does not exist.
+- Run this after `npm run build` to produce a release.
 
 ## Local Environment Development With Docker
 
