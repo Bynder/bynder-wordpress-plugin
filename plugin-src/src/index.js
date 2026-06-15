@@ -320,10 +320,12 @@ registerBlockType('bynder/bynder-asset-block', {
 							}
 						};
 
-						// embedCode is an iframe (embedType="iframe") — insert as a Custom HTML block
+						// embedCode is an iframe (embedType="iframe") — insert as a server-side
+						// rendered bynder/video-embed block so that wp_kses cannot strip
+						// <script> or <iframe srcdoc> content when a non-admin saves the post.
 						if (!isUrl(selectedUrl)) {
-							block = createBlock('core/html', {
-								content: selectedUrl,
+							block = createBlock('bynder/video-embed', {
+								embedCode: selectedUrl,
 							});
 
 							break;
@@ -568,6 +570,43 @@ registerBlockType('bynder/bynder-gallery-block', {
 	 * @param {Object} props Props.
 	 */
 	save: (props) => {},
+});
+
+/**
+ * Register a server-side rendered block for Bynder video embed codes.
+ *
+ * Embed codes (e.g. <iframe srcdoc="…"> or <script src="…"> players) are
+ * stored as a JSON block attribute inside the Gutenberg block HTML comment.
+ * HTML comments are not parsed by wp_kses, so the raw embed code survives
+ * when a non-admin user saves the post. PHP outputs it on the frontend via
+ * bynder_render_video_embed_block() in init.php.
+ */
+registerBlockType('bynder/video-embed', {
+	title: 'Bynder Video Embed',
+	icon: bynderLogo,
+	category: 'common',
+	attributes: {
+		embedCode: {
+			type: 'string',
+			default: '',
+		},
+	},
+	supports: {
+		inserter: false, // Only created programmatically via Bynder Compact View
+	},
+	edit: ({ attributes }) => {
+		if (!attributes.embedCode) {
+			return (
+				<div className="bynder-video-embed-placeholder">
+					Bynder Video Embed
+				</div>
+			);
+		}
+		return (
+			<div dangerouslySetInnerHTML={{ __html: attributes.embedCode }} />
+		);
+	},
+	save: () => null, // Server-side rendered via bynder_render_video_embed_block
 });
 
 /**

@@ -92,10 +92,47 @@ function bynder_block_cgb_block_assets() { // phpcs:ignore
 			'editor_style'  => 'bynder_block-cgb-block-editor-css',
 		)
 	);
+
+	// Register the server-side rendered video embed block.
+	// The embed code is stored as a JSON attribute inside the Gutenberg block
+	// HTML comment, which wp_kses never parses, so <script> and <iframe srcdoc>
+	// content is preserved even when non-admin users save the post.
+	register_block_type(
+		'bynder/video-embed',
+		array(
+			'attributes'      => array(
+				'embedCode' => array(
+					'type'    => 'string',
+					'default' => '',
+				),
+			),
+			'render_callback' => 'bynder_render_video_embed_block',
+		)
+	);
 }
 
 // Hook: Block assets.
 add_action( 'init', 'bynder_block_cgb_block_assets' );
+
+/**
+ * Server-side render callback for the bynder/video-embed block.
+ *
+ * Outputs the Bynder embed code stored as a block attribute. Because the
+ * attribute is encoded as JSON inside a Gutenberg HTML block comment it is
+ * never touched by wp_kses during post save, preserving <script> and
+ * <iframe srcdoc> elements that WordPress would otherwise strip for
+ * non-admin users.
+ *
+ * @param array $attributes Block attributes.
+ * @return string Rendered HTML.
+ */
+function bynder_render_video_embed_block( $attributes ) {
+	if ( empty( $attributes['embedCode'] ) ) {
+		return '';
+	}
+	
+	return $attributes['embedCode'];
+}
 
 function bynder_enqueue_admin_scripts( $hook ) {
     if ( 'settings_page_bynder' != $hook ) {
