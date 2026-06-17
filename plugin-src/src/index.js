@@ -11,7 +11,7 @@ import { createHigherOrderComponent } from '@wordpress/compose';
 import { dispatch, select } from '@wordpress/data';
 import { cloneElement, createElement, Fragment } from '@wordpress/element';
 import { addFilter } from '@wordpress/hooks';
-import { replaceInnerBlocks } from '@wordpress/block-editor'
+import { replaceInnerBlocks } from '@wordpress/block-editor';
 
 const bynderLogo = (props) => (
 	<svg width={24} height={24} viewBox="0 0 20 20" {...props}>
@@ -34,6 +34,11 @@ const assetFieldSelection = `
   files
   ... on Video {
     previewUrls
+    streamingLinks {
+      dash
+      hls
+      embedCode
+    }
   }
 `;
 
@@ -41,7 +46,9 @@ const assetFieldSelection = `
 addFilter('blocks.registerBlockType', 'bynderAttributes', (settings) => {
 	// Check if object exists for old Gutenberg version compatibility
 	if (typeof settings.attributes !== 'undefined') {
-		if (['core/image', 'core/video', 'core/audio'].includes(settings.name)) {
+		if (
+			['core/image', 'core/video', 'core/audio'].includes(settings.name)
+		) {
 			settings.attributes = Object.assign(settings.attributes, {
 				bynder: {
 					type: 'string',
@@ -96,10 +103,11 @@ addFilter(
 	'blocks.getSaveElement',
 	'bynderIds',
 	(element, block, attributes) => {
-
 		// Add bynder id to images and videos
 		if (
-			['core/image', 'core/video', 'core/file', 'core/audio'].includes(block.name) &&
+			['core/image', 'core/video', 'core/file', 'core/audio'].includes(
+				block.name
+			) &&
 			attributes.bynder
 		) {
 			return cloneElement(element, {
@@ -131,24 +139,27 @@ addFilter(
 
 			var addToGallery = (assets) => {
 				var galleryImages = assets.reduce((result, asset) => {
-					if(asset.type === "IMAGE") {
+					if (asset.type === 'IMAGE') {
 						var file =
 							asset.files[cgbGlobal.bynderImageDerivative] ||
 							asset.files.webImage;
-						result.push(createBlock('core/image', {
-							url: file.url,
-							alt: asset.name,
-							bynder: asset.databaseId,
-						}));
+						result.push(
+							createBlock('core/image', {
+								url: file.url,
+								alt: asset.name,
+								bynder: asset.databaseId,
+							})
+						);
 					}
 					return result;
 				}, []);
-				const parentBlock = select('core/block-editor').getBlocksByClientId(props.clientId)[0];
+				const parentBlock = select(
+					'core/block-editor'
+				).getBlocksByClientId(props.clientId)[0];
 				const existingGalleryImages = parentBlock.innerBlocks;
 				dispatch('core/block-editor').replaceInnerBlocks(
 					props.clientId,
-					 [...existingGalleryImages, ...galleryImages],
-
+					[...existingGalleryImages, ...galleryImages]
 				);
 				closeModal();
 			};
@@ -260,15 +271,18 @@ registerBlockType('bynder/bynder-asset-block', {
 					) {
 						alert(
 							asset.name +
-							' is not marked as public and the original cannot be selected.'
+								' is not marked as public and the original cannot be selected.'
 						);
 					}
 					var file =
 						asset.files[cgbGlobal.bynderImageDerivative] ||
 						asset.files.webImage;
 
-					if(cgbGlobal.bynderSelectionMode === "SingleSelectFile" && additionalInfo.selectedFile) {
-						file = additionalInfo.selectedFile || file
+					if (
+						cgbGlobal.bynderSelectionMode === 'SingleSelectFile' &&
+						additionalInfo.selectedFile
+					) {
+						file = additionalInfo.selectedFile || file;
 					}
 					block = createBlock('core/image', {
 						// Fetching the webimage derivative by default
@@ -286,34 +300,72 @@ registerBlockType('bynder/bynder-asset-block', {
 					) {
 						alert(
 							asset.name +
-							' is not marked as public and the original cannot be selected.'
+								' is not marked as public and the original cannot be selected.'
 						);
 					}
-					// Fetching the mp4 video preview url by default, fallback to original if mp4 isn't found
-					var url = asset.previewUrls.find((previewUrl) => {
-						var extension = previewUrl.split('.').pop();
-						return extension === 'mp4';
-					});
 
-					// break if preview url not found and original is also undefined
-					// video url below uses previewUrl if found, otherwise original url
-					// break if original url not found
-					if (!url && asset.files != null && asset.files.original === undefined) {
-						break;
+					let videoUrl;
+
+					if (
+						cgbGlobal.bynderSelectionMode === 'SingleSelectFile' &&
+						additionalInfo.selectedFile
+					) {
+						const selectedUrl = additionalInfo.selectedFile.url;
+						const isUrl = (str) => {
+							try {
+								new URL(str);
+								return true;
+							} catch {
+								return false;
+							}
+						};
+
+						// embedCode is an iframe (embedType="iframe") — insert as a server-side
+						// rendered bynder/video-embed block so that wp_kses cannot strip
+						// <script> or <iframe srcdoc> content when a non-admin saves the post.
+						if (!isUrl(selectedUrl)) {
+							block = createBlock('bynder/video-embed', {
+								embedCode: selectedUrl,
+							});
+
+							break;
+						}
+
+						videoUrl = selectedUrl;
+					} else {
+						// Fetching the mp4 video preview url by default, fallback to original if mp4 isn't found
+						const previewUrl = asset.previewUrls.find((url) => {
+							const extension = url.split('.').pop();
+							return extension === 'mp4';
+						});
+
+						// break if preview url not found and original is also undefined
+						if (
+							!previewUrl &&
+							asset.files != null &&
+							asset.files.original === undefined
+						) {
+							break;
+						}
+
+						videoUrl = previewUrl
+							? previewUrl
+							: asset.files.original.url;
 					}
 
-
-					var videoUrl = url ? url : asset.files.original.url;
 					block = createBlock('core/video', {
 						src: videoUrl,
 						bynder: asset.databaseId,
 					});
 					break;
 				case 'AUDIO':
-					if (asset.files != null && asset.files.original === undefined) {
+					if (
+						asset.files != null &&
+						asset.files.original === undefined
+					) {
 						alert(
 							asset.name +
-							' is not marked as public and the original cannot be selected.'
+								' is not marked as public and the original cannot be selected.'
 						);
 						// break because audioUrl uses original url
 						break;
@@ -326,10 +378,13 @@ registerBlockType('bynder/bynder-asset-block', {
 					});
 					break;
 				case 'DOCUMENT':
-					if (asset.files != null && asset.files.original === undefined) {
+					if (
+						asset.files != null &&
+						asset.files.original === undefined
+					) {
 						alert(
 							asset.name +
-							' is not marked as public and the original cannot be selected.'
+								' is not marked as public and the original cannot be selected.'
 						);
 						// break to prevent creating a file block without a valid url
 						break;
@@ -375,6 +430,7 @@ registerBlockType('bynder/bynder-asset-block', {
 							defaultSearchTerm={
 								cgbGlobal.bynderDefaultSearchTerm
 							}
+							embedType="iframe"
 						/>
 					</Login>
 				</Modal>
@@ -446,21 +502,27 @@ registerBlockType('bynder/bynder-gallery-block', {
 
 		var addGallery = (assets) => {
 			var galleryImages = assets.reduce((result, asset) => {
-				if(asset.type === "IMAGE") {
+				if (asset.type === 'IMAGE') {
 					var file =
 						asset.files[cgbGlobal.bynderImageDerivative] ||
 						asset.files.webImage;
-					result.push(createBlock('core/image', {
-						url: file.url,
-						alt: asset.name,
-						bynder: asset.databaseId,
-					}));
+					result.push(
+						createBlock('core/image', {
+							url: file.url,
+							alt: asset.name,
+							bynder: asset.databaseId,
+						})
+					);
 				}
 				return result;
 			}, []);
-			var block = createBlock('core/gallery', {
-				bynderGallery: true
-			}, galleryImages);
+			var block = createBlock(
+				'core/gallery',
+				{
+					bynderGallery: true,
+				},
+				galleryImages
+			);
 			dispatch('core/block-editor').replaceBlock(props.clientId, block);
 			closeModal();
 		};
@@ -489,6 +551,7 @@ registerBlockType('bynder/bynder-gallery-block', {
 							defaultSearchTerm={
 								cgbGlobal.bynderDefaultSearchTerm
 							}
+							embedType="iframe"
 						/>
 					</Login>
 				</Modal>
@@ -510,35 +573,72 @@ registerBlockType('bynder/bynder-gallery-block', {
 });
 
 /**
+ * Register a server-side rendered block for Bynder video embed codes.
+ *
+ * Embed codes (e.g. <iframe srcdoc="…"> or <script src="…"> players) are
+ * stored as a JSON block attribute inside the Gutenberg block HTML comment.
+ * HTML comments are not parsed by wp_kses, so the raw embed code survives
+ * when a non-admin user saves the post. PHP outputs it on the frontend via
+ * bynder_render_video_embed_block() in init.php.
+ */
+registerBlockType('bynder/video-embed', {
+	title: 'Bynder Video Embed',
+	icon: bynderLogo,
+	category: 'common',
+	attributes: {
+		embedCode: {
+			type: 'string',
+			default: '',
+		},
+	},
+	supports: {
+		inserter: false, // Only created programmatically via Bynder Compact View
+	},
+	edit: ({ attributes }) => {
+		if (!attributes.embedCode) {
+			return (
+				<div className="bynder-video-embed-placeholder">
+					Bynder Video Embed
+				</div>
+			);
+		}
+		return (
+			<div dangerouslySetInnerHTML={{ __html: attributes.embedCode }} />
+		);
+	},
+	save: () => null, // Server-side rendered via bynder_render_video_embed_block
+});
+
+/**
  * Featured Image tab for Media Frame modal
  */
 var l10n = wp.media.view.l10n;
-wp.media.view.MediaFrame.Select.prototype.browseRouter = function( routerView ) {
-	if(wp.media.frame && wp.media.frame.options.state === "featured-image") {
+wp.media.view.MediaFrame.Select.prototype.browseRouter = function (routerView) {
+	if (wp.media.frame && wp.media.frame.options.state === 'featured-image') {
 		routerView.set({
 			upload: {
-				text:     l10n.uploadFilesTitle,
-				priority: 20
+				text: l10n.uploadFilesTitle,
+				priority: 20,
 			},
 			browse: {
-				text:     l10n.mediaLibraryTitle,
-				priority: 40
+				text: l10n.mediaLibraryTitle,
+				priority: 40,
 			},
 			bynder: {
-				text:     "Bynder",
-				priority: 60
-			}
+				text: 'Bynder',
+				priority: 60,
+			},
 		});
 	} else {
 		routerView.set({
 			upload: {
-				text:     l10n.uploadFilesTitle,
-				priority: 20
+				text: l10n.uploadFilesTitle,
+				priority: 20,
 			},
 			browse: {
-				text:     l10n.mediaLibraryTitle,
-				priority: 40
-			}
+				text: l10n.mediaLibraryTitle,
+				priority: 40,
+			},
 		});
 	}
 };
@@ -548,76 +648,88 @@ class UCVSingleSelect extends React.Component {
 		super(props);
 		this.state = {
 			isOpen: false,
-			importState: "",
-			msgContent: "",
-			featuredImageUrl: ""
+			importState: '',
+			msgContent: '',
+			featuredImageUrl: '',
 		};
 	}
 	render() {
 		var openModal = () => {
-			this.setState({isOpen: true});
+			this.setState({ isOpen: true });
 		};
 
 		var closeModal = () => {
-			this.setState({isOpen: false});
+			this.setState({ isOpen: false });
 		};
 
 		var updateStateCallback = (state) => {
 			this.setState(state);
 		};
 
-
 		var addAsset = (assets, additionalInfo) => {
 			const asset = assets[0];
 			var file =
-					asset.files[cgbGlobal.bynderImageDerivative] ||
-					asset.files.webImage;
+				asset.files[cgbGlobal.bynderImageDerivative] ||
+				asset.files.webImage;
 
-			if(cgbGlobal.bynderSelectionMode === "SingleSelectFile" && additionalInfo.selectedFile) {
-				file = additionalInfo.selectedFile || file
+			if (
+				cgbGlobal.bynderSelectionMode === 'SingleSelectFile' &&
+				additionalInfo.selectedFile
+			) {
+				file = additionalInfo.selectedFile || file;
 			}
 			closeModal();
 
 			// Set loading state
 			this.setState({
-				importState: "loading",
-				msgContent: "Loading asset into Wordpress.."
+				importState: 'loading',
+				msgContent: 'Loading asset into Wordpress..',
 			});
 
-			const baseErrorMessage = "An error occurred while setting the featured image";
-			wp.ajax.post( "bynder_featured", {
-				'id': document.getElementById('post_ID').value,
-				'url': file.url,
-				'bynder-nonce': cgbGlobal.bynderNonce
-			}).done(function(response){
-    			if(response.att_id && response.url) {
-					updateStateCallback({importState: "success", featuredImageUrl: response.url});
-					var selection = wp.media.frame.state().get( 'selection' );
-					selection.reset([ wp.media.attachment( response.att_id )]);
-				} else {
+			const baseErrorMessage =
+				'An error occurred while setting the featured image';
+			wp.ajax
+				.post('bynder_featured', {
+					id: document.getElementById('post_ID').value,
+					url: file.url,
+					'bynder-nonce': cgbGlobal.bynderNonce,
+				})
+				.done(function (response) {
+					if (response.att_id && response.url) {
+						updateStateCallback({
+							importState: 'success',
+							featuredImageUrl: response.url,
+						});
+						var selection = wp.media.frame.state().get('selection');
+						selection.reset([wp.media.attachment(response.att_id)]);
+					} else {
+						updateStateCallback({
+							importState: 'error',
+							msgContent: baseErrorMessage,
+						});
+					}
+				})
+				.fail(function (response) {
+					// Error state if the download to the media library fails from Bynder
+					const errorMsg = `: ${response.error} (${response.error_code})`;
 					updateStateCallback({
-						importState: "error",
-						msgContent: baseErrorMessage
+						importState: 'error',
+						msgContent: baseErrorMessage + errorMsg,
 					});
-				}
-  			}).fail(function(response){
-				// Error state if the download to the media library fails from Bynder
-				const errorMsg = `: ${response.error} (${response.error_code})`;
-				updateStateCallback({
-					importState: "error",
-					msgContent: baseErrorMessage + errorMsg
 				});
-			});
 		};
 
 		return (
 			<React.Fragment>
 				<div id="bynder-featured-image-preview">
-					{(this.state.importState === "loading" || this.state.importState === "error") && (
-						<div className="ucv-media-frame-message">{this.state.msgContent}</div>
+					{(this.state.importState === 'loading' ||
+						this.state.importState === 'error') && (
+						<div className="ucv-media-frame-message">
+							{this.state.msgContent}
+						</div>
 					)}
-					{this.state.importState === "success" && (
-						<img src={this.state.featuredImageUrl} height="250"/>
+					{this.state.importState === 'success' && (
+						<img src={this.state.featuredImageUrl} height="250" />
 					)}
 				</div>
 				<div>
@@ -638,12 +750,13 @@ class UCVSingleSelect extends React.Component {
 						<CompactView
 							language={cgbGlobal.language}
 							mode={cgbGlobal.bynderSelectionMode}
-							assetTypes={["IMAGE"]}
+							assetTypes={['IMAGE']}
 							assetFieldSelection={assetFieldSelection}
 							onSuccess={addAsset}
 							defaultSearchTerm={
 								cgbGlobal.bynderDefaultSearchTerm
 							}
+							embedType="iframe"
 						/>
 					</Login>
 				</Modal>
@@ -652,27 +765,32 @@ class UCVSingleSelect extends React.Component {
 	}
 }
 
-document.addEventListener('click',function(e){
-    if(e.target && e.target.id== 'menu-item-bynder'){
+document.addEventListener('click', function (e) {
+	if (e.target && e.target.id == 'menu-item-bynder') {
 		renderCompactViewFeaturedImage();
-     }
+	}
 });
-wp.media.view.Modal.prototype.on( "open", function(data) {
+wp.media.view.Modal.prototype.on('open', function (data) {
 	renderCompactViewFeaturedImage();
 });
 function renderCompactViewFeaturedImage() {
 	var mediaModals = document.querySelectorAll('.media-modal');
-	mediaModals.forEach(function(mediaModal){
+	mediaModals.forEach(function (mediaModal) {
 		var modal = mediaModal.parentElement;
-		if(window.getComputedStyle(modal).display !== "none"
-			&& modal.querySelector('.media-modal-content .media-router .media-menu-item.active#menu-item-bynder')) {
-				const domContainer = modal.querySelector('body .media-modal-content .media-frame-content');
-				domContainer.innerHTML = "";
-				var ucvContainer = document.createElement('div');
-				ucvContainer.setAttribute('class', 'ucv-media-frame');
-				domContainer.appendChild(ucvContainer);
-				ReactDOM.render(<UCVSingleSelect/>, ucvContainer);
+		if (
+			window.getComputedStyle(modal).display !== 'none' &&
+			modal.querySelector(
+				'.media-modal-content .media-router .media-menu-item.active#menu-item-bynder'
+			)
+		) {
+			const domContainer = modal.querySelector(
+				'body .media-modal-content .media-frame-content'
+			);
+			domContainer.innerHTML = '';
+			var ucvContainer = document.createElement('div');
+			ucvContainer.setAttribute('class', 'ucv-media-frame');
+			domContainer.appendChild(ucvContainer);
+			ReactDOM.render(<UCVSingleSelect />, ucvContainer);
 		}
 	});
-
 }
