@@ -1,0 +1,8 @@
+apiVersion: backstage.io/v1alpha1
+kind: Component
+metadata:
+  name: bynder-wordpress-plugin
+  description: Bynder bynder-wordpress-plugin
+spec:
+  owner: integrations
+  lifecycle: production
