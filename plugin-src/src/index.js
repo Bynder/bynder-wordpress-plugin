@@ -611,24 +611,17 @@ registerBlockType('bynder/video-embed', {
 
 /**
  * Featured Image tab for Media Frame modal
+ *
+ * Preserve the inherited browseRouter (and any tabs added by other plugins, e.g.
+ * Cloudinary) by calling it first, then append the Bynder tab. Overwriting the
+ * method outright would drop tabs registered by other integrations.
  */
 var l10n = wp.media.view.l10n;
+var inheritedBrowseRouter =
+	wp.media.view.MediaFrame.Select.prototype.browseRouter;
 wp.media.view.MediaFrame.Select.prototype.browseRouter = function (routerView) {
-	if (wp.media.frame && wp.media.frame.options.state === 'featured-image') {
-		routerView.set({
-			upload: {
-				text: l10n.uploadFilesTitle,
-				priority: 20,
-			},
-			browse: {
-				text: l10n.mediaLibraryTitle,
-				priority: 40,
-			},
-			bynder: {
-				text: 'Bynder',
-				priority: 60,
-			},
-		});
+	if (typeof inheritedBrowseRouter === 'function') {
+		inheritedBrowseRouter.apply(this, arguments);
 	} else {
 		routerView.set({
 			upload: {
@@ -638,6 +631,15 @@ wp.media.view.MediaFrame.Select.prototype.browseRouter = function (routerView) {
 			browse: {
 				text: l10n.mediaLibraryTitle,
 				priority: 40,
+			},
+		});
+	}
+
+	if (wp.media.frame && wp.media.frame.options.state === 'featured-image') {
+		routerView.set({
+			bynder: {
+				text: 'Bynder',
+				priority: 60,
 			},
 		});
 	}
